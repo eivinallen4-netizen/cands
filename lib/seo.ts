@@ -3,12 +3,17 @@ import { business, areas } from "@/content/site";
 
 /**
  * Canonical origin, no trailing slash. Used by metadataBase, canonicals, Open Graph, the sitemap,
- * robots.txt and JSON-LD. Development falls back to localhost; a production build or server
- * refuses to start without NEXT_PUBLIC_SITE_URL, so search engines never see localhost URLs.
+ * robots.txt and JSON-LD. NEXT_PUBLIC_SITE_URL wins; on Vercel the project's production domain
+ * is used when it is unset. Development falls back to localhost; any other production build or
+ * server refuses to start without NEXT_PUBLIC_SITE_URL, so search engines never see localhost URLs.
  */
 function resolveSiteUrl() {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (fromEnv) return fromEnv.replace(/\/+$/, "");
+  // On Vercel, fall back to the project's production domain (the custom domain once one is
+  // assigned, otherwise the *.vercel.app one). Vercel provides these without a protocol.
+  const vercelHost = (process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL)?.trim();
+  if (vercelHost) return `https://${vercelHost.replace(/^https?:\/\//, "").replace(/\/+$/, "")}`;
   if (process.env.NODE_ENV === "production") {
     throw new Error(
       "NEXT_PUBLIC_SITE_URL is not set. Set it to the live origin (for example https://www.example.com) " +
