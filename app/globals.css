@@ -1,0 +1,414 @@
+@import "tailwindcss";
+
+/* Brand taken from the C&S logo: cyan car + cyan "C&S", heavy black wordmark,
+   italic "AUTO BODY SHOP" between two black rules, white ground, hard edges.
+   Contrast notes (WCAG 2.2 AA):
+   - cyan #00abd1 is a FILL colour only (2.71:1 on white). Never text or thin lines on light grounds.
+   - cyan-text #00738c is the cyan for text on white / paper / cyan-pale (5.48 / 5.01 / 4.86).
+   - ink on cyan 7.18:1. Never white on cyan.
+   - on ink, text is white at >= 60% opacity. */
+@theme {
+  --color-cyan: #00abd1;
+  --color-cyan-text: #00738c;
+  --color-cyan-deep: #007f9c;
+  --color-cyan-pale: #e0f5fa;
+  --color-ink: #0b0d0f;
+  --color-ink-2: #1a1e22;
+  --color-steel: #5b6570;
+  --color-line: #d6dce1;
+  --color-paper: #f3f5f6;
+  --color-tape: #ffd60a;
+  --color-danger: #b3261e;
+  --color-danger-pale: #fdecea;
+
+  --font-display: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --shadow-hard: 4px 4px 0 #000;
+  --shadow-hard-light: 4px 4px 0 #fff;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* header (64px + 3px rule) + 16px; sticky action bar (56px) + 16px */
+    scroll-padding-top: 83px;
+    scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-top: 107px;
+      scroll-padding-bottom: 16px;
+    }
+  }
+
+  body {
+    background: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+    text-wrap: balance;
+  }
+  h3 {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.18;
+  }
+
+  /* Focus: ink on light grounds, white on ink, ink on cyan. Always 3px, 2px offset. */
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  .on-dark :focus-visible {
+    outline-color: #fff;
+  }
+  .on-cyan :focus-visible,
+  .on-dark .on-light :focus-visible {
+    outline-color: var(--color-ink);
+  }
+
+  details > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@layer components {
+  /* The logo's signature: italic words riding between two black rules. */
+  .rule-label {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.3;
+    color: var(--color-cyan-text);
+    padding: 4px 2px;
+    border-top: 3px solid var(--color-ink);
+    border-bottom: 3px solid var(--color-ink);
+  }
+  .on-dark .rule-label {
+    color: var(--color-cyan);
+    border-color: #fff;
+  }
+  .on-cyan .rule-label {
+    color: var(--color-ink);
+    border-color: var(--color-ink);
+  }
+
+  /* Lead / secondary text that adapts to its ground. */
+  .lead {
+    color: var(--color-steel);
+  }
+  .on-dark .lead {
+    color: rgb(255 255 255 / 0.78);
+  }
+  .on-cyan .lead {
+    color: var(--color-ink);
+  }
+
+  /* "Confirm with owner" tags: hidden for the public, visible in dev and at ?review=1 */
+  .confirm-tag {
+    display: none;
+  }
+  html[data-review] .confirm-tag {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.4rem;
+    background: var(--color-tape);
+    color: #000;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    line-height: 1.4;
+    white-space: nowrap;
+    transform: rotate(-1.5deg);
+  }
+
+  /* Corner dot version of the review tag, for buttons and the sticky bar (needs a positioned parent). */
+  .confirm-dot {
+    display: none;
+  }
+  html[data-review] .confirm-dot {
+    display: block;
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--color-tape);
+    border: 2px solid #000;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* Buttons. Sizes: md = 48px, lg = 56px. Hard shadow is opt-in (.btn-shadow), max one per screen. */
+  .btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3rem;
+    padding: 0 1.25rem;
+    border: 2px solid transparent;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 0.9375rem;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: pointer;
+    transition:
+      transform 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .btn-md {
+    min-height: 3rem;
+    padding: 0 1.25rem;
+  }
+  .btn-lg {
+    min-height: 3.5rem;
+    padding: 0 1.75rem;
+    font-size: 1rem;
+  }
+  .btn-cyan {
+    background: var(--color-cyan);
+    color: #000;
+  }
+  .btn-cyan:hover {
+    background: #33bcda;
+  }
+  .btn-ink {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-ink:hover {
+    background: var(--color-ink-2);
+  }
+  .on-dark .btn-ink {
+    border-color: #fff;
+  }
+  .btn-ghost {
+    border-color: currentColor;
+    background: transparent;
+  }
+  .btn-ghost:hover {
+    background: var(--color-ink);
+    color: #fff;
+    border-color: var(--color-ink);
+  }
+  .on-dark .btn-ghost:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+  .btn-shadow {
+    box-shadow: var(--shadow-hard);
+  }
+  .btn-shadow:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
+  }
+  .on-dark .btn-shadow {
+    box-shadow: var(--shadow-hard-light);
+  }
+  .on-dark .btn-shadow:hover {
+    box-shadow: 2px 2px 0 #fff;
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Form controls: full 2px ink box, 48px tall, 17px text (no iOS zoom). */
+  .field {
+    display: block;
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.625rem 0.875rem;
+    border: 2px solid var(--color-ink);
+    border-radius: 0;
+    background: #fff;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 1.0625rem;
+    line-height: 1.4;
+  }
+  .field::placeholder {
+    color: var(--color-steel);
+    opacity: 1;
+  }
+  .field[aria-invalid="true"] {
+    border-color: var(--color-danger);
+    box-shadow: inset 4px 0 0 var(--color-danger);
+  }
+  .field-label {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-ink);
+  }
+  .field-hint {
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-steel);
+  }
+  .field-error {
+    display: flex;
+    gap: 0.4rem;
+    align-items: flex-start;
+    margin-top: 0.4rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--color-danger);
+  }
+
+  /* Chip: a native checkbox/radio styled as a 48px toggle. */
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0 1rem;
+    border: 2px solid var(--color-ink);
+    background: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .chip input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+  .chip:has(input:checked) {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .chip:has(input:focus-visible) {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  .chip-mark {
+    display: none;
+    margin-right: 0.4rem;
+  }
+  .chip:has(input:checked) .chip-mark {
+    display: inline;
+  }
+
+  .sr-only-focusable:not(:focus) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  details[open] .faq-plus {
+    transform: rotate(45deg);
+  }
+}
+
+@keyframes rise {
+  /* Movement only: text stays readable even if the animation never runs. */
+  from {
+    transform: translateY(14px);
+  }
+  to {
+    transform: none;
+  }
+}
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .btn-shadow:hover {
+    transform: none;
+  }
+}
+
+/* Placeholder blocks (e.g. owner details on /about): visible only in dev and at ?review=1. */
+.review-only {
+  display: none;
+}
+html[data-review] .review-only {
+  display: block;
+}
+
+/* Print: content only. No header, footer, sticky bar, breadcrumbs or buttons. */
+@media print {
+  body {
+    padding-bottom: 0 !important;
+    font-size: 11pt;
+  }
+  header,
+  footer,
+  nav,
+  .btn,
+  .confirm-tag,
+  nextjs-portal {
+    display: none !important;
+  }
+  .on-dark {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  a {
+    text-decoration: none;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
