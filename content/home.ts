@@ -60,7 +60,7 @@ export const home: {
     h1Accent: " Guaranteed in Writing",
     h1Confirmed: false,
     subhead: {
-      text: "A local body shop that restores your vehicle to pre-accident condition. Get a free estimate: text us photos or stop by the shop.",
+      text: "Text us photos of the damage and we reply with a free estimate. We work with most major insurance companies, so your claim is one less thing to handle.",
       confirmed: false,
     },
     replyTime: {

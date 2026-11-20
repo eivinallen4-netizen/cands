@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import Image from "next/image";
 import Link from "next/link";
 import { business, reviews, work } from "@/content/site";
@@ -34,10 +32,8 @@ export const metadata = pageMetadata({
 const wrap = "mx-auto w-full max-w-[1180px] px-5 sm:px-8";
 const section = "py-14 md:py-28";
 
-// The generated spray-booth shot is atmosphere only (decorative, never captioned as C&S work).
-const heroSrc = fs.existsSync(path.join(process.cwd(), "public/images/hero-booth.jpg"))
-  ? "/images/hero-booth.jpg"
-  : "/images/hero.png";
+// The hero is the real shop front, so the first thing a visitor sees is the actual building and sign.
+const heroSrc = work.shop.src;
 
 const textLink = "inline-flex min-h-11 items-center gap-2 font-semibold text-cyan-text underline underline-offset-4";
 
@@ -58,9 +54,9 @@ export default function Home() {
           fill
           preload
           sizes="100vw"
-          className="-z-20 object-cover object-[72%_center] opacity-60 md:opacity-100"
+          className="-z-20 object-cover object-[72%_38%] max-md:hidden"
         />
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-ink via-ink/85 to-ink/10 max-md:bg-ink/55" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-ink via-ink/85 to-ink/10 max-md:hidden" />
         <div className={`${wrap} pb-8 pt-6 md:pb-24 md:pt-24`}>
           <div className="max-w-[660px]">
             <RuleLabel className="rise">{hero.eyebrow}</RuleLabel>
@@ -91,6 +87,10 @@ export default function Home() {
               <Confirm confirmed={hero.replyTime.confirmed} />
             </p>
           </div>
+        </div>
+        {/* Phones: the headline fills the width, so the shop photo gets its own clear band under the buttons. */}
+        <div className="relative h-44 border-t-[3px] border-white md:hidden">
+          <Image src={heroSrc} alt="" fill preload sizes="100vw" className="object-cover object-[80%_42%]" />
         </div>
         <TrustStrip proof={hero.proof} />
       </section>
@@ -150,7 +150,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 5. SERVICES DIRECTORY */}
+      {/* 5. COMPACT ESTIMATE FORM + PHOTO TIPS: straight after the proof, while the visitor still wants the estimate */}
+      <section id="estimate" aria-labelledby="estimate-title" className={`${section} border-t-[3px] border-ink bg-paper`}>
+        <div className={`${wrap} grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16`}>
+          <div className="grid content-start gap-8">
+            <SectionHeader
+              id="estimate-title"
+              title={<LineText line={home.estimate.heading} />}
+              lead={
+                <>
+                  {home.estimate.lead.text}
+                  <Confirm confirmed={home.estimate.lead.confirmed} />
+                  {/* home.estimate.honesty is not repeated here: the form's noObligation line under the
+                      button already carries the same sentence word for word. */}
+                </>
+              }
+            />
+            <PhotoTips />
+          </div>
+          <div className="border-[3px] border-ink bg-white p-5 sm:p-10 lg:shadow-[10px_10px_0_var(--color-ink)]">
+            <EstimateForm variant="compact" privacyLink={home.estimate.privacy} />
+          </div>
+        </div>
+      </section>
+
+      {/* 6. SERVICES DIRECTORY */}
       <section aria-labelledby="services-title" className={`${section} border-t-[3px] border-ink`}>
         <div className={`${wrap} grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20`}>
           <div className="lg:sticky lg:top-32 lg:self-start">
@@ -165,7 +189,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 6. WHY CHOOSE: confirmed facts on ink beside the real shop, promises as a checklist */}
+      {/* 7. WHY CHOOSE: confirmed facts on ink beside the real shop, promises as a checklist */}
       <section aria-labelledby="why-title" className={`${section} bg-paper`}>
         <div className={wrap}>
           <SectionHeader id="why-title" title={home.why.heading} />
@@ -186,7 +210,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 7. REPAIR PROCESS */}
+      {/* 8. REPAIR PROCESS */}
       <section aria-labelledby="process-title" className={`on-dark ${section} bg-ink text-white`}>
         <div className={wrap}>
           <SectionHeader id="process-title" title={home.process.heading} lead={home.process.lead} />
@@ -196,7 +220,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 8. INSURANCE BAND (cyan) */}
+      {/* 9. INSURANCE BAND (cyan) */}
       <section aria-labelledby="insurance-title" className="on-cyan bg-cyan py-14 text-ink md:py-24">
         <div className={`${wrap} grid gap-10 md:grid-cols-2 md:gap-16`}>
           <div>
@@ -213,7 +237,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9. REVIEWS */}
+      {/* 10. REVIEWS */}
       <section aria-labelledby="reviews-title" className={section}>
         <div className={wrap}>
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -238,7 +262,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 10. FAQ */}
+      {/* 11. FAQ */}
       <section aria-labelledby="faq-title" className={`${section} bg-paper`}>
         <div className={`${wrap} grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16`}>
           <div>
@@ -248,30 +272,6 @@ export default function Home() {
             </Button>
           </div>
           <FaqList faqs={home.faq.items} />
-        </div>
-      </section>
-
-      {/* 11. COMPACT ESTIMATE FORM + PHOTO TIPS */}
-      <section id="estimate" aria-labelledby="estimate-title" className={section}>
-        <div className={`${wrap} grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16`}>
-          <div className="grid content-start gap-8">
-            <SectionHeader
-              id="estimate-title"
-              title={<LineText line={home.estimate.heading} />}
-              lead={
-                <>
-                  {home.estimate.lead.text}
-                  <Confirm confirmed={home.estimate.lead.confirmed} />
-                  {/* home.estimate.honesty is not repeated here: the form's noObligation line under the
-                      button already carries the same sentence word for word. */}
-                </>
-              }
-            />
-            <PhotoTips />
-          </div>
-          <div className="border-[3px] border-ink bg-white p-5 sm:p-10 lg:shadow-[10px_10px_0_var(--color-ink)]">
-            <EstimateForm variant="compact" privacyLink={home.estimate.privacy} />
-          </div>
         </div>
       </section>
 
